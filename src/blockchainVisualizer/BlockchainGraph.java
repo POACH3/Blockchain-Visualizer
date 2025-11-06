@@ -280,7 +280,7 @@ public class BlockchainGraph
                 StdOut.println("input not contain '" + source + "'");
             }
             
-            StdOut.println("\number of wallets: " + sg.addresses.length);
+            StdOut.println("\nnumber of wallets: " + sg.addresses.length);
             StdOut.println("addresses: ");
             for (String address : sg.addresses)
             {

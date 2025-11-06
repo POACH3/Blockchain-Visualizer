@@ -32,14 +32,26 @@ public class GUI {
 	private static Color walletNormal = new Color(100, 115, 165, 155);
 	private static Color walletHover = new Color(150, 165, 200, 155);
 	
+	private static ArrayList<double[]> firstDegWallets = new ArrayList<>();
+	private static ArrayList<double[]> walletLocations = new ArrayList<double[]>();
+	
+	private static double searchWalletValue = 20;
 	
 	
-	public static void drawWallet(double xCenter, double yCenter, boolean mouse)
+	
+	/**
+	 * 
+	 * @param xCenter
+	 * @param yCenter
+	 * @param value
+	 * @param mouse
+	 */
+	public static void drawWallet(double xCenter, double yCenter, double value, boolean mouse)
 	{
 		if (mouse == true)
 		{
 			StdDraw.setPenColor(walletHover);
-			StdDraw.filledCircle(width/2, height/2, 52);
+			StdDraw.filledCircle(width/2, height/2, (30 + 3 * value) + 2);
 			
 			//StdDraw.setPenColor(StdDraw.DARK_GRAY);
 			//StdDraw.text(width/2, height/2 - 100, "wallet address");
@@ -47,31 +59,41 @@ public class GUI {
 		else
 		{		
 			StdDraw.setPenColor(walletNormal);
-			StdDraw.filledCircle(xCenter, yCenter, 50);
+			StdDraw.filledCircle(xCenter, yCenter, 30 + 3 * value);
 		}
 	}
 	
+	
+	/**
+	 * 
+	 * @param value
+	 * @param mouse
+	 */
 	public static void drawSearchWallet(boolean mouse)
 	{
-		drawWallet(width/2, height/2, mouse);
+		drawWallet(width/2, height/2, searchWalletValue, mouse);
 	}
 	
 	
-	public static void drawFirstDegree(ArrayList<Integer> wallets)
+	/**
+	 * 
+	 * @param firstDegWallets
+	 */
+	public static void drawFirstDegree()
 	//public static void drawFirstDegree(ArrayList<Wallet> wallets)
 	{
 		double xPivot = width/2;  // x-coord around which the wallets are arranged
 		double yPivot = height/2; // y-coord around which the wallets are arranged
 
-		ArrayList<double[]> walletLocations = new ArrayList<double[]>();
+		//ArrayList<double[]> walletLocations = new ArrayList<double[]>();
 		
-		for (int i = 0; i < 360; i = i + (360 / wallets.size()))
+		for (int i = 0; i < firstDegWallets.size(); i++)
 		{
 			double distance; // related to number of total 1st deg wallets and this wallet's size
 			double angle; 	 // related to number of total 1st deg wallets and each wallet size
 			
-			distance = 300;
-			angle = i;
+			distance = 200 + (3 * firstDegWallets.size()) + (10 * firstDegWallets.get(i)[0]);
+			angle = i * 360 / firstDegWallets.size();
 			
 			double xCenter = xPivot + polarToCartesian(distance, angle)[0];
 			double yCenter = yPivot + polarToCartesian(distance, angle)[1];
@@ -79,53 +101,35 @@ public class GUI {
 			double[] array = {xCenter, yCenter};
 			walletLocations.add(array);
 			
-			// draw wallets
-			StdDraw.setPenColor(walletNormal);
-			StdDraw.filledCircle(xCenter, yCenter, 40);
+			// normalize wallet size
+			double maxSize;
+			double minSize;
 			
-			// draw transactions
-			drawTransaction(xPivot, yPivot, xCenter, yCenter);
+			// draw wallet
+			StdDraw.setPenColor(walletNormal);
+			drawWallet(xCenter, yCenter, firstDegWallets.get(i)[0], false); //FIXME
+			
+			// draw transaction
+			drawTransaction(xPivot, yPivot, 30 + 3 * searchWalletValue, xCenter, yCenter, 30 + 3 * firstDegWallets.get(i)[0], firstDegWallets.get(i)[1], firstDegWallets.get(i)[2]);
 		}
 		
-		
 
-		
 	}
 	
-	//public static void drawFirstDegWallets(ArrayList<Wallet> wallets)
-//	public static void drawFirstDegWallets(ArrayList<Integer> wallets)
-//	{
-//		double xPivot = width/2;  // x-coord around which the wallets are arranged
-//		double yPivot = height/2; // y-coord around which the wallets are arranged
-//		
-//		for (int i = 0; i < 360; i = i + (360 / wallets.size()))
-//		{
-//			double distance; // related to number of total 1st deg wallets and this wallet's size
-//			double angle; 	 // related to number of total 1st deg wallets and each wallet size
-//			
-//			distance = 300;
-//			angle = i;
-//			
-//			double xCenter = xPivot + polarToCartesian(distance, angle)[0];
-//			double yCenter = yPivot + polarToCartesian(distance, angle)[1];
-//			
-//			StdDraw.setPenColor(walletNormal);
-//			StdDraw.filledCircle(xCenter, yCenter, 40);
-//		}
-//	}
-//	
-//	public static void drawFirstDegTransactions(double xPivot, double yPivot, ArrayList<double[]> walletLocations)
-//	{
-//		for (double[] walletLocation : walletLocations)
-//		{
-//			drawTransaction(xPivot, yPivot, walletLocation[0], walletLocation[1]);
-//		}
-//	}
 	
-	public static void drawTransaction(double fromWalletX, double fromWalletY, double toWalletX, double toWalletY)
+	/**
+	 * 
+	 * @param fromWalletX
+	 * @param fromWalletY
+	 * @param fromWalletR
+	 * @param toWalletX
+	 * @param toWalletY
+	 * @param toWalletR
+	 */
+	public static void drawTransaction(double fromWalletX, double fromWalletY, double fromWalletR, double toWalletX, double toWalletY, double toWalletR, double num, double value)
 	{
-		double fromWalletR = 50;
-		double toWalletR = 40;
+		//double fromWalletR = 50;
+		//double toWalletR = 40;
 		
 		double theta = angle(fromWalletX, fromWalletY, toWalletX, toWalletY);
 		
@@ -134,19 +138,32 @@ public class GUI {
 		double headX = toWalletX - polarToCartesian(toWalletR, theta)[0];
 		double headY = toWalletY - polarToCartesian(toWalletR, theta)[1];
 		
-		drawArrowCartesian(tailX, tailY, headX, headY);
+		StdDraw.setPenColor(new Color(0,(int)(50 + 5 * value),0,255));
+		//StdDraw.setPenRadius(.002 + (num/10000));
+		drawArrowCartesian(tailX, tailY, headX, headY, (num/100));
 	}
 	
-	public static void drawArrowPolar(double tailX, double tailY, double distance, double angle)
+	
+	/**
+	 * 
+	 * @param tailX
+	 * @param tailY
+	 * @param distance
+	 * @param angle
+	 */
+	public static void drawArrowPolar(double tailX, double tailY, double distance, double angle, double scale)
 	{
-		double arrowheadLength = 16;
-		double arrowheadWidth = 12;
+//		double arrowheadLength = 16 * .5 * scale;
+//		double arrowheadWidth = 12 * .5 * scale;
+		double arrowheadLength = 8 + 8 * scale;
+		double arrowheadWidth = 6 + 6 * scale;
 		
 		// draw arrow line
 		double lineHeadX = tailX + polarToCartesian(distance - arrowheadLength, angle)[0]; // x-coord head of line
 		double lineHeadY = tailY + polarToCartesian(distance - arrowheadLength, angle)[1]; // y-coord head of line
 		
-		StdDraw.setPenColor(maxGreen);
+		//StdDraw.setPenColor(maxGreen);
+		StdDraw.setPenRadius(.002 + .003 * scale);
 		StdDraw.line(tailX, tailY, lineHeadX, lineHeadY);
 		
 		// draw arrow head
@@ -164,16 +181,24 @@ public class GUI {
 		
 		//add fourth point to sweep arrowhead
 		
-		StdDraw.setPenColor(maxRed);
+		//StdDraw.setPenColor(maxRed);
 		StdDraw.filledPolygon(arrowheadX, arrowheadY);
 	}
 	
-	public static void drawArrowCartesian(double tailX, double tailY, double headX, double headY)
+	
+	/**
+	 * 
+	 * @param tailX
+	 * @param tailY
+	 * @param headX
+	 * @param headY
+	 */
+	public static void drawArrowCartesian(double tailX, double tailY, double headX, double headY, double scale)
 	{
 		double distance = Math.sqrt(Math.pow(headX - tailX, 2) + Math.pow(headY - tailY, 2));
 		double angle = angle(tailX, tailY, headX, headY);
 		
-		drawArrowPolar(tailX, tailY, distance, angle);
+		drawArrowPolar(tailX, tailY, distance, angle, scale);
 	}
 	
 	/**
@@ -253,20 +278,18 @@ public class GUI {
 		
 		
 		//TEST
-		ArrayList<Integer> wallets = new ArrayList<>(); //stand in for ArrayList<Wallet> wallets
+		//ArrayList<double[]> wallets = new ArrayList<>(); //stand in for ArrayList<Wallet> wallets
 		double[] array = new double[4];
 		
-		wallets.add(1); // value, transaction1, transaction2, transaction3
-		wallets.add(2);
-		wallets.add(3);
-		wallets.add(4);
-		wallets.add(5);
-		wallets.add(6);
-		wallets.add(20);
-		wallets.add(8);
-		wallets.add(9);
-		wallets.add(10);
-		wallets.add(11);
+		firstDegWallets.add(new double[]{1, 11, .3}); // WalletValue, transactionsNumber, transactionsValue
+		firstDegWallets.add(new double[]{12.3, 55, 3});
+		firstDegWallets.add(new double[]{3, 17, 3});
+		firstDegWallets.add(new double[]{11, 107, 3});
+		firstDegWallets.add(new double[]{.5, 3, 1.1});
+		firstDegWallets.add(new double[]{20, 221, 8.1});
+		firstDegWallets.add(new double[]{12, 20, 3.3});
+		firstDegWallets.add(new double[]{6, 98, 1.4});
+		firstDegWallets.add(new double[]{1, 2, .2});
 		
 		
 		// draw loop
@@ -284,7 +307,7 @@ public class GUI {
 			StdDraw.text(500, height - 22, "SEARCH");
 
 			
-			// mouse over information
+		// mouse over information
 			// 		wallet circle:     address, net value
 			//  	transaction arrow: total transactions, net value, value sent, value received, volume?
 			String address = "0xf3d7d404D3B8A5ab5a45D7573e44a6CFf37D3c89";
@@ -294,12 +317,12 @@ public class GUI {
 			StdDraw.textLeft(width - 600, height - 35, "WALLET VALUE: " + value + " BNB");
 
 			
-			// check for mouse over
+		// check for mouse over
 			
 			
-			// draw circles and arrows
+		// draw circles and arrows
 			drawSearchWallet(mouseOver());
-			drawFirstDegree(wallets);
+			drawFirstDegree();
 			
 //			drawFirstDegWallets(wallets);
 //			drawFirstDegTransactions(width/2, height/2, walletLocations);

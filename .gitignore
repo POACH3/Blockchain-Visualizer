@@ -1,0 +1,13 @@
+# Eclipse project files
+.metadata/
+.settings/
+*.project
+
+# Build output
+bin/
+
+# Compiled class files
+*.class
+
+# macOS system files
+.DS_Store
